@@ -16,14 +16,20 @@ import {
   getSessionWithShots,
   type SessionRow,
   type ShotRow,
-} from '../../db/wedge-sessions'
-import { DeviationChart, type ShotResult } from '../../components/charts'
+} from '../db/wedge-sessions'
+import {
+  saveSessionLocal,
+  getSessionsLocal,
+  getSessionWithShotsLocal,
+} from '../storage/wedge-storage'
+import { DeviationChart, type ShotResult } from '../components/charts'
 
-export const Route = createFileRoute('/_authed/wedge-practice')({
+export const Route = createFileRoute('/wedge-practice')({
   component: WedgePractice,
 })
 
 function WedgePractice() {
+  const { user } = Route.useRouteContext()
   const [min, setMin] = useState('')
   const [max, setMax] = useState('')
   const [targets, setTargets] = useState<number[]>([])
@@ -40,8 +46,9 @@ function WedgePractice() {
   const [loadingSession, setLoadingSession] = useState(false)
 
   useEffect(() => {
-    getSessions().then(setPastSessions).catch(console.error)
-  }, [])
+    const load = user ? getSessions : getSessionsLocal
+    load().then(setPastSessions).catch(console.error)
+  }, [user])
 
   function openPastSession(sessionId: string) {
     if (viewingSessionId === sessionId) {
@@ -52,7 +59,8 @@ function WedgePractice() {
     }
     setLoadingSession(true)
     setViewingSessionId(sessionId)
-    getSessionWithShots({ data: { sessionId } })
+    const loadDetail = user ? getSessionWithShots : getSessionWithShotsLocal
+    loadDetail({ data: { sessionId } })
       .then((result) => {
         if (result) {
           setViewingSession(result.session)
@@ -108,7 +116,9 @@ function WedgePractice() {
       const sd = Math.sqrt(variance)
 
       setSaving(true)
-      saveSession({
+      const save = user ? saveSession : saveSessionLocal
+      const loadAll = user ? getSessions : getSessionsLocal
+      save({
         data: {
           minYards: parseInt(min, 10),
           maxYards: parseInt(max, 10),
@@ -117,7 +127,7 @@ function WedgePractice() {
           shots: allResults,
         },
       })
-        .then(() => getSessions())
+        .then(() => loadAll())
         .then(setPastSessions)
         .catch(console.error)
         .finally(() => setSaving(false))

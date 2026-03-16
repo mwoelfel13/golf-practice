@@ -19,10 +19,15 @@ import {
   getPuttingSessionAttempts,
   type PuttingSessionRow,
   type PuttingAttemptRow,
-} from '../../db/putting-sessions'
-import { MakeRateChart, DirectionalBiasChart, SpeedBiasChart } from '../../components/charts'
+} from '../db/putting-sessions'
+import {
+  savePuttingSessionLocal,
+  getPuttingSessionsLocal,
+  getPuttingSessionAttemptsLocal,
+} from '../storage/putting-storage'
+import { MakeRateChart, DirectionalBiasChart, SpeedBiasChart } from '../components/charts'
 
-export const Route = createFileRoute('/_authed/stack-putting')({
+export const Route = createFileRoute('/stack-putting')({
   component: StackPutting,
 })
 
@@ -72,6 +77,7 @@ function describePutt(putt: Putt): string {
 }
 
 function StackPutting() {
+  const { user } = Route.useRouteContext()
   const [putts, setPutts] = useState<Putt[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [results, setResults] = useState<PuttResult[]>([])
@@ -91,8 +97,9 @@ function StackPutting() {
   const [loadingSession, setLoadingSession] = useState(false)
 
   useEffect(() => {
-    getPuttingSessions().then(setPastSessions).catch(console.error)
-  }, [])
+    const load = user ? getPuttingSessions : getPuttingSessionsLocal
+    load().then(setPastSessions).catch(console.error)
+  }, [user])
 
   function openPastSession(sessionId: string) {
     if (viewingSessionId === sessionId) {
@@ -102,7 +109,8 @@ function StackPutting() {
     }
     setLoadingSession(true)
     setViewingSessionId(sessionId)
-    getPuttingSessionAttempts({ data: { sessionId } })
+    const loadAttempts = user ? getPuttingSessionAttempts : getPuttingSessionAttemptsLocal
+    loadAttempts({ data: { sessionId } })
       .then((attempts: PuttingAttemptRow[]) => {
         setViewingResults(
           attempts.map((a) => ({
@@ -175,7 +183,9 @@ function StackPutting() {
       ).length
 
       setSaving(true)
-      savePuttingSession({
+      const save = user ? savePuttingSession : savePuttingSessionLocal
+      const loadAll = user ? getPuttingSessions : getPuttingSessionsLocal
+      save({
         data: {
           totalPutts: newResults.length,
           puttsMade,
@@ -193,7 +203,7 @@ function StackPutting() {
           })),
         },
       })
-        .then(() => getPuttingSessions())
+        .then(() => loadAll())
         .then(setPastSessions)
         .catch(console.error)
         .finally(() => setSaving(false))

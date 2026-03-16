@@ -9,14 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WedgePracticeRouteImport } from './routes/wedge-practice'
+import { Route as StackPuttingRouteImport } from './routes/stack-putting'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
-import { Route as AuthedWedgePracticeRouteImport } from './routes/_authed/wedge-practice'
-import { Route as AuthedStackPuttingRouteImport } from './routes/_authed/stack-putting'
 
+const WedgePracticeRoute = WedgePracticeRouteImport.update({
+  id: '/wedge-practice',
+  path: '/wedge-practice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StackPuttingRoute = StackPuttingRouteImport.update({
+  id: '/stack-putting',
+  path: '/stack-putting',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LogoutRoute = LogoutRouteImport.update({
   id: '/logout',
   path: '/logout',
@@ -25,10 +34,6 @@ const LogoutRoute = LogoutRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthedRoute = AuthedRouteImport.update({
-  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -41,41 +46,30 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedWedgePracticeRoute = AuthedWedgePracticeRouteImport.update({
-  id: '/wedge-practice',
-  path: '/wedge-practice',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedStackPuttingRoute = AuthedStackPuttingRouteImport.update({
-  id: '/stack-putting',
-  path: '/stack-putting',
-  getParentRoute: () => AuthedRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
-  '/stack-putting': typeof AuthedStackPuttingRoute
-  '/wedge-practice': typeof AuthedWedgePracticeRoute
+  '/stack-putting': typeof StackPuttingRoute
+  '/wedge-practice': typeof WedgePracticeRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
-  '/stack-putting': typeof AuthedStackPuttingRoute
-  '/wedge-practice': typeof AuthedWedgePracticeRoute
+  '/stack-putting': typeof StackPuttingRoute
+  '/wedge-practice': typeof WedgePracticeRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
-  '/_authed/stack-putting': typeof AuthedStackPuttingRoute
-  '/_authed/wedge-practice': typeof AuthedWedgePracticeRoute
+  '/stack-putting': typeof StackPuttingRoute
+  '/wedge-practice': typeof WedgePracticeRoute
   '/auth/callback': typeof AuthCallbackRoute
 }
 export interface FileRouteTypes {
@@ -98,24 +92,38 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_authed'
     | '/login'
     | '/logout'
-    | '/_authed/stack-putting'
-    | '/_authed/wedge-practice'
+    | '/stack-putting'
+    | '/wedge-practice'
     | '/auth/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthedRoute: typeof AuthedRouteWithChildren
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
+  StackPuttingRoute: typeof StackPuttingRoute
+  WedgePracticeRoute: typeof WedgePracticeRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wedge-practice': {
+      id: '/wedge-practice'
+      path: '/wedge-practice'
+      fullPath: '/wedge-practice'
+      preLoaderRoute: typeof WedgePracticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stack-putting': {
+      id: '/stack-putting'
+      path: '/stack-putting'
+      fullPath: '/stack-putting'
+      preLoaderRoute: typeof StackPuttingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/logout': {
       id: '/logout'
       path: '/logout'
@@ -128,13 +136,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authed': {
-      id: '/_authed'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -151,41 +152,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/wedge-practice': {
-      id: '/_authed/wedge-practice'
-      path: '/wedge-practice'
-      fullPath: '/wedge-practice'
-      preLoaderRoute: typeof AuthedWedgePracticeRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/stack-putting': {
-      id: '/_authed/stack-putting'
-      path: '/stack-putting'
-      fullPath: '/stack-putting'
-      preLoaderRoute: typeof AuthedStackPuttingRouteImport
-      parentRoute: typeof AuthedRoute
-    }
   }
 }
 
-interface AuthedRouteChildren {
-  AuthedStackPuttingRoute: typeof AuthedStackPuttingRoute
-  AuthedWedgePracticeRoute: typeof AuthedWedgePracticeRoute
-}
-
-const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedStackPuttingRoute: AuthedStackPuttingRoute,
-  AuthedWedgePracticeRoute: AuthedWedgePracticeRoute,
-}
-
-const AuthedRouteWithChildren =
-  AuthedRoute._addFileChildren(AuthedRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthedRoute: AuthedRouteWithChildren,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
+  StackPuttingRoute: StackPuttingRoute,
+  WedgePracticeRoute: WedgePracticeRoute,
   AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport

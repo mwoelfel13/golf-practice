@@ -1,4 +1,4 @@
-import type { SessionRow, ShotRow } from '../db/wedge-sessions'
+import type { SessionRow, ShotRow } from '../types/wedge'
 
 const STORAGE_KEY = 'golf:wedge_sessions'
 

@@ -2,7 +2,7 @@ import type {
   PuttingSessionRow,
   PuttingAttemptRow,
   PuttingAttemptInput,
-} from '../db/putting-sessions'
+} from '../types/putting'
 
 const STORAGE_KEY = 'golf:putting_sessions'
 

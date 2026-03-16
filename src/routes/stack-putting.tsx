@@ -17,9 +17,8 @@ import {
   savePuttingSession,
   getPuttingSessions,
   getPuttingSessionAttempts,
-  type PuttingSessionRow,
-  type PuttingAttemptRow,
 } from '../db/putting-sessions'
+import type { PuttingSessionRow, PuttingAttemptRow } from '../types/putting'
 import {
   savePuttingSessionLocal,
   getPuttingSessionsLocal,
@@ -231,25 +230,35 @@ function StackPutting() {
   ).length
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="md" sx={{ py: sessionActive ? 2 : 4 }}>
       <Button
         component={Link}
         to="/"
         startIcon={<ArrowBackIcon />}
-        sx={{ mb: 3 }}
+        sx={{ mb: sessionActive ? 1 : 3 }}
+        size={sessionActive ? 'small' : 'medium'}
       >
         Home
       </Button>
 
-      <Paper elevation={3} sx={{ borderRadius: 4, p: { xs: 3, sm: 5 } }}>
-        <Typography variant="overline">Putting</Typography>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Stack Putting
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
-          18 random putts between 5 and 30 feet. Track makes, misses, and what
-          went wrong to find patterns in your putting.
-        </Typography>
+      <Paper elevation={3} sx={{ borderRadius: 4, p: { xs: 2, sm: 5 } }}>
+        {/* Header — condensed during active session */}
+        {sessionActive ? (
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 2, textAlign: 'center' }}>
+            Stack Putting
+          </Typography>
+        ) : (
+          <>
+            <Typography variant="overline">Putting</Typography>
+            <Typography variant="h3" fontWeight={700} gutterBottom>
+              Stack Putting
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
+              18 random putts between 5 and 30 feet. Track makes, misses, and what
+              went wrong to find patterns in your putting.
+            </Typography>
+          </>
+        )}
 
         {/* Start button */}
         {!sessionActive && !sessionComplete && (
@@ -263,8 +272,8 @@ function StackPutting() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Progress */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Putt {currentIndex + 1} of {putts.length}
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                Putt {currentIndex + 1} / {putts.length}
               </Typography>
               <LinearProgress
                 variant="determinate"

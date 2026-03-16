@@ -1,5 +1,5 @@
 import { HeadContent, Link, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
-import { useMemo, useState, createContext, useContext } from 'react'
+import { useEffect, useMemo, useState, createContext, useContext } from 'react'
 import {
   ThemeProvider,
   createTheme,
@@ -67,13 +67,12 @@ function NotFound() {
 function RootComponent() {
   const { user } = Route.useRouteContext()
 
-  const [mode, setMode] = useState<'light' | 'dark'>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('theme')
-      if (saved === 'dark') return 'dark'
-    }
-    return 'light'
-  })
+  const [mode, setMode] = useState<'light' | 'dark'>('light')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme')
+    if (saved === 'dark') setMode('dark')
+  }, [])
 
   const colorMode = useMemo(
     () => ({

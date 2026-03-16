@@ -1,25 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import sql from '../db'
 import { getAuthenticatedUserId } from '../utils/supabase.server'
+import type { SessionRow, ShotRow } from '../types/wedge'
 
-export interface SessionRow {
-  id: string
-  user_id: string
-  min_yards: number
-  max_yards: number
-  avg_diff: number
-  std_dev: number
-  created_at: string
-}
-
-export interface ShotRow {
-  id: string
-  session_id: string
-  shot_number: number
-  target: number
-  actual: number
-  diff: number
-}
+export type { SessionRow, ShotRow }
 
 export const saveSession = createServerFn({ method: 'POST' })
   .inputValidator(

@@ -14,9 +14,8 @@ import {
   saveSession,
   getSessions,
   getSessionWithShots,
-  type SessionRow,
-  type ShotRow,
 } from '../db/wedge-sessions'
+import type { SessionRow, ShotRow } from '../types/wedge'
 import {
   saveSessionLocal,
   getSessionsLocal,
@@ -171,25 +170,35 @@ function WedgePractice() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="md" sx={{ py: sessionActive ? 2 : 4 }}>
       <Button
         component={Link}
         to="/"
         startIcon={<ArrowBackIcon />}
-        sx={{ mb: 3 }}
+        sx={{ mb: sessionActive ? 1 : 3 }}
+        size={sessionActive ? 'small' : 'medium'}
       >
         Home
       </Button>
 
-      <Paper elevation={3} sx={{ borderRadius: 4, p: { xs: 3, sm: 5 } }}>
-        <Typography variant="overline">Short Game</Typography>
-        <Typography variant="h3" fontWeight={700} gutterBottom>
-          Wedge Practice
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
-          Set a distance range, then dial in your wedges by hitting to random
-          targets. Track how close each shot lands.
-        </Typography>
+      <Paper elevation={3} sx={{ borderRadius: 4, p: { xs: 2, sm: 5 } }}>
+        {/* Header — condensed during active session */}
+        {sessionActive ? (
+          <Typography variant="h5" fontWeight={700} sx={{ mb: 2, textAlign: 'center' }}>
+            Wedge Practice
+          </Typography>
+        ) : (
+          <>
+            <Typography variant="overline">Short Game</Typography>
+            <Typography variant="h3" fontWeight={700} gutterBottom>
+              Wedge Practice
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
+              Set a distance range, then dial in your wedges by hitting to random
+              targets. Track how close each shot lands.
+            </Typography>
+          </>
+        )}
 
         {/* Setup form */}
         {!sessionActive && !sessionComplete && (
@@ -202,6 +211,7 @@ function WedgePractice() {
               placeholder="e.g. 40"
               size="small"
               sx={{ width: 120 }}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
             />
             <TextField
               label="Max (yards)"
@@ -211,6 +221,7 @@ function WedgePractice() {
               placeholder="e.g. 120"
               size="small"
               sx={{ width: 120 }}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
             />
             <Button
               variant="contained"
@@ -226,8 +237,8 @@ function WedgePractice() {
         {sessionActive && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2" color="text.secondary">
-                Shot {currentIndex + 1} of {targets.length}
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                Shot {currentIndex + 1} / {targets.length}
               </Typography>
               <LinearProgress
                 variant="determinate"
@@ -246,22 +257,34 @@ function WedgePractice() {
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, alignItems: 'stretch' }}>
               <TextField
-                type="number"
                 value={shotInput}
-                onChange={(e) => setShotInput(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/[^0-9]/g, '')
+                  setShotInput(v)
+                }}
                 onKeyDown={(e) => e.key === 'Enter' && submitShot()}
-                placeholder="Your distance"
+                placeholder="Yards"
                 autoFocus
-                size="small"
-                sx={{ width: 150 }}
-                inputProps={{ style: { textAlign: 'center', fontWeight: 600 } }}
+                sx={{ width: 160 }}
+                inputProps={{
+                  inputMode: 'numeric',
+                  pattern: '[0-9]*',
+                  style: {
+                    textAlign: 'center',
+                    fontWeight: 700,
+                    fontSize: '1.5rem',
+                    padding: '14px 12px',
+                  },
+                }}
               />
               <Button
                 variant="contained"
                 onClick={submitShot}
                 disabled={!shotInput}
+                size="large"
+                sx={{ fontSize: '1.1rem', px: 3 }}
               >
                 Submit
               </Button>

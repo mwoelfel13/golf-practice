@@ -397,6 +397,62 @@ function StackPutting() {
         )}
       </Paper>
 
+      {/* Recent sessions — shown on setup screen */}
+      {!sessionActive && !sessionComplete && pastSessions.length > 0 && (
+        <Paper elevation={2} sx={{ mt: 3, borderRadius: 4, p: { xs: 3, sm: 5 } }}>
+          <Typography variant="overline">Recent Sessions</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+            {pastSessions.slice(0, 5).map((s) => (
+              <Box key={s.id}>
+                <Paper
+                  variant="outlined"
+                  onClick={() => openPastSession(s.id)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    px: 2,
+                    py: 1.5,
+                    borderRadius: 2,
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'action.hover' },
+                    ...(viewingSessionId === s.id
+                      ? { borderColor: 'primary.main', borderWidth: 2 }
+                      : {}),
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    {new Date(s.created_at).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} color="primary">
+                    {s.putts_made}/{s.total_putts} ({s.make_pct}%)
+                  </Typography>
+                  {s.three_putt_count > 0 && (
+                    <Typography variant="body2" color="error">
+                      {s.three_putt_count} 3-putt{s.three_putt_count !== 1 ? 's' : ''}
+                    </Typography>
+                  )}
+                </Paper>
+
+                {viewingSessionId === s.id && !loadingSession && viewingResults.length > 0 && (
+                  <PastSessionDetail results={viewingResults} session={s} />
+                )}
+                {viewingSessionId === s.id && loadingSession && (
+                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                    Loading...
+                  </Typography>
+                )}
+              </Box>
+            ))}
+          </Box>
+        </Paper>
+      )}
+
       {/* Full results list */}
       {sessionComplete && (
         <Paper elevation={2} sx={{ mt: 3, borderRadius: 4, p: { xs: 3, sm: 5 } }}>

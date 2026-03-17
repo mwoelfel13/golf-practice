@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Container,
   Box,
@@ -44,6 +44,7 @@ function WedgePractice() {
   const [viewingShots, setViewingShots] = useState<ShotResult[]>([])
   const [viewingSession, setViewingSession] = useState<SessionRow | null>(null)
   const [loadingSession, setLoadingSession] = useState(false)
+  const shotInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const load = user ? getSessions : getSessionsLocal
@@ -133,6 +134,7 @@ function WedgePractice() {
         .finally(() => setSaving(false))
     } else {
       setCurrentIndex(currentIndex + 1)
+      setTimeout(() => shotInputRef.current?.focus(), 0)
     }
   }
 
@@ -256,7 +258,8 @@ function WedgePractice() {
                 autoFocus
                 size="small"
                 sx={{ width: 150 }}
-                inputProps={{ style: { textAlign: 'center', fontWeight: 600 } }}
+                inputRef={shotInputRef}
+                inputProps={{ inputMode: 'numeric', style: { textAlign: 'center', fontWeight: 600 } }}
               />
               <Button
                 variant="contained"
@@ -312,6 +315,116 @@ function WedgePractice() {
           </Box>
         )}
       </Paper>
+
+      {/* Recent sessions — shown on setup screen */}
+      {!sessionActive && !sessionComplete && pastSessions.length > 0 && (
+        <Paper elevation={2} sx={{ mt: 3, borderRadius: 4, p: { xs: 3, sm: 5 } }}>
+          <Typography variant="overline">Recent Sessions</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+            {pastSessions.slice(0, 5).map((s) => (
+              <Box key={s.id}>
+                <Paper
+                  variant="outlined"
+                  onClick={() => openPastSession(s.id)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    px: 2,
+                    py: 1.5,
+                    borderRadius: 2,
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: 'action.hover' },
+                    ...(viewingSessionId === s.id && {
+                      borderColor: 'primary.main',
+                      borderWidth: 2,
+                    }),
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    {new Date(s.created_at).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Typography>
+                  <Typography variant="body2">
+                    {s.min_yards}–{s.max_yards} yds
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} color="primary">
+                    Avg {s.avg_diff} yds off
+                  </Typography>
+                </Paper>
+
+                {viewingSessionId === s.id && (
+                  <Box sx={{ mt: 1 }}>
+                    {loadingSession ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                        Loading...
+                      </Typography>
+                    ) : viewingShots.length > 0 && viewingSession ? (
+                      <>
+                        <Paper elevation={1} sx={{ borderRadius: 3, p: 3, mb: 1, textAlign: 'center' }}>
+                          <Typography variant="overline" color="text.secondary">
+                            {new Date(viewingSession.created_at).toLocaleDateString(undefined, {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </Typography>
+                          <Typography variant="h4" fontWeight={700}>
+                            Avg. {viewingSession.avg_diff} yds off
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Std Dev: {viewingSession.std_dev} yds &middot; {viewingSession.min_yards}–{viewingSession.max_yards} yd range
+                          </Typography>
+                        </Paper>
+
+                        <DeviationChart
+                          results={viewingShots}
+                          stdDev={Number(viewingSession.std_dev)}
+                        />
+
+                        <Paper elevation={1} sx={{ borderRadius: 3, p: 2, mt: 1 }}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                            {viewingShots.map((r, i) => (
+                              <Paper
+                                key={i}
+                                variant="outlined"
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  px: 2,
+                                  py: 1,
+                                  borderRadius: 2,
+                                }}
+                              >
+                                <Typography variant="body2" color="text.secondary">
+                                  #{i + 1}
+                                </Typography>
+                                <Typography variant="body2">
+                                  Target: {r.target} | Hit: {r.actual}
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600} color={diffColor(r.diff)}>
+                                  {r.diff === 0 ? 'Perfect!' : `${r.diff} yds off`}
+                                </Typography>
+                              </Paper>
+                            ))}
+                          </Box>
+                        </Paper>
+                      </>
+                    ) : null}
+                  </Box>
+                )}
+              </Box>
+            ))}
+          </Box>
+        </Paper>
+      )}
 
       {/* Deviation chart */}
       {sessionComplete && (
